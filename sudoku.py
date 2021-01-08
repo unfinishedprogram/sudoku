@@ -56,9 +56,8 @@ class Sudoku(object):
                 if event.type == pygame.QUIT:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    print("MouseDown")
+                    pass
                 if event.type == pygame.MOUSEBUTTONUP:
-                    print("MouseUp")
                     self.select_cell(self.get_object_at(pygame.mouse.get_pos()))
 
                 if event.type == pygame.KEYDOWN:
@@ -89,16 +88,17 @@ class Sudoku(object):
     def is_safe(self, cell, number):
         if number == 0:
             return True
+
         for i in self.regions[cell.region]:
-            if number == cell.number:
+            if number == i.number:
                 return False
 
         for i in self.rows[cell.row]:
-            if number == cell.number:
+            if number == i.number:
                 return False
 
         for i in self.cols[cell.col]:
-            if number == cell.number:
+            if number == i.number:
                 return False
         return True
 
@@ -110,6 +110,7 @@ class Sudoku(object):
 
     def solve(self):
         cell = self.find_unassigned()
+
         if cell:
             for num in range(9):
                 if self.is_safe(cell, num+1):
@@ -117,7 +118,9 @@ class Sudoku(object):
                     check = self.solve()
                     if check:
                         return True
-                    cell.set_number(0)
+                    else:
+                        cell.set_number(0)
+
             return False
         else:
             return True
@@ -155,10 +158,8 @@ class UI(object):
         else:
             pygame.draw.rect(self.screen, (255, 255, 255), square, width=2, border_radius=2)
 
-
         if cell.number > 0:
             self.screen.blit(self.chars[cell.number-1], (cell_x, cell_y))
-
 
 class Cell(object):
     def __init__(self, game, region, col, row):
