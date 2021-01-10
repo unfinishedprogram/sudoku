@@ -10,11 +10,11 @@ print(sys.getrecursionlimit())
 class Sudoku(object):
     def __init__(self):
         self.ui = UI()
+        self.ui.add_button(pygame.Rect(0, 600, 100, 100), "Solve", self.solve)
         self.screen = None
         self.regions = [[] for rows in range(9)]
         self.rows = [[] for rows in range(9)]
         self.cols = [[] for rows in range(9)]
-
         self.cells = []
         self.selectedCell = None
 
@@ -36,7 +36,10 @@ class Sudoku(object):
             square_y = math.floor(mouse[1] / (self.ui.screenSize[0] / 9))
             return self.cells[square_y * 9 + square_x]
         else:
-            pass
+            for button in self.ui.buttons:
+                if button.is_picked(mouse[0], mouse[1]):
+                    button.click_on()
+        return None
 
     def select_cell(self, cell):
         if(cell):
@@ -126,6 +129,7 @@ class Sudoku(object):
             return True
 class UI(object):
     def __init__(self):
+        self.buttons = []
         self.screenSize = width, height = 600, 700
         pygame.init()
         font = pygame.font.SysFont('Tahoma', 60)
@@ -146,6 +150,8 @@ class UI(object):
         self.screen.fill((150, 150, 150))
         for cell in sudoku.cells:
             self.draw_cell(cell)
+        for button in self.buttons:
+            self.draw_button(button)
         pygame.display.flip()
 
     def draw_cell(self, cell):
@@ -160,6 +166,32 @@ class UI(object):
 
         if cell.number > 0:
             self.screen.blit(self.chars[cell.number-1], (cell_x, cell_y))
+
+    def draw_button(self, button):
+        font = pygame.font.SysFont('Tahoma', 60)
+        pygame.draw.rect(self.screen, (255, 255, 255), button.rect, border_radius=2)
+        self.screen.blit(font.render(button.text, True, (255, 255, 255)), button.rect[0], button.rect[1])
+
+    class Button(object):
+        def __init__(self, rect, text, function):
+            self.rect = rect
+            self.text = text
+            self.function = function
+
+        def click_on(self):
+            self.function()
+
+        def is_picked(self, mousex, mousey):
+            if self.rect[0] < mousex < self.rect[0]+self.rect[2] & self.rect[1] < mousey < self.rect[0]+self.rect[3]:
+                return True
+            else:
+                return False
+
+
+    def add_button(self, rect, text, function):
+        self.buttons.append(self.Button(rect, text, function))
+
+
 
 class Cell(object):
     def __init__(self, game, region, col, row):
