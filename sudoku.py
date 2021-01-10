@@ -3,14 +3,13 @@ import math
 import pygame
 import pygame.key
 import sys
-print(sys.getrecursionlimit())
-
 
 
 class Sudoku(object):
     def __init__(self):
         self.ui = UI()
-        self.ui.add_button(pygame.Rect(0, 600, 100, 100), "Solve", self.solve)
+        self.ui.add_button(pygame.Rect(20, 620, 300-40, 100-40), "solve", self.solve)
+        self.ui.add_button(pygame.Rect(320, 620, 300-40, 100-40), "clear", self.clear)
         self.screen = None
         self.regions = [[] for rows in range(9)]
         self.rows = [[] for rows in range(9)]
@@ -88,6 +87,12 @@ class Sudoku(object):
                         self.solve()
             self.ui.draw(self)
 
+
+    def clear(self):
+        for cell in self.cells:
+            cell.set_number(0)
+
+
     def is_safe(self, cell, number):
         if number == 0:
             return True
@@ -152,6 +157,11 @@ class UI(object):
             self.draw_cell(cell)
         for button in self.buttons:
             self.draw_button(button)
+        region_size = 600/3
+        for i in range(3):
+            for j in range(3):
+                region_square = pygame.Rect(i*region_size, j*region_size, region_size, region_size)
+                pygame.draw.rect(self.screen, (0, 0, 0), region_square, width=3)
         pygame.display.flip()
 
     def draw_cell(self, cell):
@@ -170,7 +180,9 @@ class UI(object):
     def draw_button(self, button):
         font = pygame.font.SysFont('Tahoma', 60)
         pygame.draw.rect(self.screen, (255, 255, 255), button.rect, border_radius=2)
-        self.screen.blit(font.render(button.text, True, (255, 255, 255)), button.rect[0], button.rect[1])
+        text_size = font.size(button.text)
+
+        self.screen.blit(font.render(button.text, True, (0, 0, 0)), (button.rect[0] + (button.rect[2] - text_size[0])/2, button.rect[1] + (button.rect[3] - text_size[1])/2))
 
     class Button(object):
         def __init__(self, rect, text, function):
@@ -179,13 +191,15 @@ class UI(object):
             self.function = function
 
         def click_on(self):
+            print(self.text, " was clicked")
             self.function()
-
         def is_picked(self, mousex, mousey):
-            if self.rect[0] < mousex < self.rect[0]+self.rect[2] & self.rect[1] < mousey < self.rect[0]+self.rect[3]:
-                return True
-            else:
-                return False
+            if (self.rect[0] < mousex < self.rect[0]+self.rect[2]):
+                if(self.rect[1] < mousey < self.rect[1]+self.rect[3]):
+                    return True
+                else:
+                    print("failed")
+                    return False
 
 
     def add_button(self, rect, text, function):
