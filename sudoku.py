@@ -132,6 +132,8 @@ class Sudoku(object):
             return False
         else:
             return True
+
+
 class UI(object):
     def __init__(self):
         self.buttons = []
